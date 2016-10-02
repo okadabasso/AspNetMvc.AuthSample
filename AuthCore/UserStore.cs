@@ -11,7 +11,9 @@ namespace AuthCore
     public class UserStore :
         IUserStore<AuthUser>,
         IUserStore<AuthUser, string>,
-        IUserPasswordStore<AuthUser, string>
+        IUserPasswordStore<AuthUser, string>,
+        IUserLockoutStore<AuthUser, string>,
+        IUserTwoFactorStore<AuthUser, string>
     {
         private AuthDbContext db;
         public UserStore(AuthDbContext applicationDbContext)
@@ -136,6 +138,65 @@ namespace AuthCore
                 db.Dispose();
                 db = null;
             }
+        }
+
+        public Task<DateTimeOffset> GetLockoutEndDateAsync(AuthUser user)
+        {
+            if (user.LockoutEndDate == null)
+            {
+                return Task.FromResult(DateTimeOffset.MinValue);
+            }
+            return Task.FromResult(new DateTimeOffset(user.LockoutEndDate.Value));
+        }
+
+        public Task SetLockoutEndDateAsync(AuthUser user, DateTimeOffset lockoutEnd)
+        {
+            user.LockoutEndDate = lockoutEnd.DateTime.ToLocalTime();
+            db.SaveChanges();
+            return Task.FromResult(0);
+        }
+
+        public Task<int> IncrementAccessFailedCountAsync(AuthUser user)
+        {
+            user.LonginRetryCount++;
+            db.SaveChanges();
+
+            return Task.FromResult(user.LonginRetryCount);
+        }
+
+        public Task ResetAccessFailedCountAsync(AuthUser user)
+        {
+            user.LonginRetryCount = 0;
+            db.SaveChanges();
+
+            return Task.FromResult(user.LonginRetryCount);
+        }
+
+        public Task<int> GetAccessFailedCountAsync(AuthUser user)
+        {
+            return Task.FromResult(user.LonginRetryCount);
+        }
+
+        public Task<bool> GetLockoutEnabledAsync(AuthUser user)
+        {
+
+            return Task.FromResult(true);
+        }
+
+        public Task SetLockoutEnabledAsync(AuthUser user, bool enabled)
+        {
+
+            return Task.FromResult(0);
+        }
+
+        public Task SetTwoFactorEnabledAsync(AuthUser user, bool enabled)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> GetTwoFactorEnabledAsync(AuthUser user)
+        {
+            return Task.FromResult(false);
         }
     }
 }

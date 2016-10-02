@@ -9,7 +9,7 @@ namespace AuthSample2.Migrations
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = false;
+            AutomaticMigrationsEnabled = true;
         }
 
         protected override void Seed(AuthSample2.Models.ApplicationDbContext context)

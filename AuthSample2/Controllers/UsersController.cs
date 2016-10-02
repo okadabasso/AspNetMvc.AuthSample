@@ -58,7 +58,7 @@ namespace AuthSample2.Controllers
         // GET: Users
         public async Task<ActionResult> Index()
         {
-            return View(await db.AuthUsers.ToListAsync());
+            return View(await db.Users.ToListAsync());
         }
 
         // GET: Users/Details/5
@@ -68,7 +68,7 @@ namespace AuthSample2.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            AuthUser user = await db.AuthUsers.FindAsync(id);
+            User user = await db.Users.FindAsync(id);
             if (user == null)
             {
                 return HttpNotFound();
@@ -96,18 +96,18 @@ namespace AuthSample2.Controllers
                     Id = Guid.NewGuid().ToString(),
                     UserName = user.UserName
                 };
-                var result = await UserManager.CreateAsync(userForCreate, user.PasswordHash);
+                var result = await UserManager.CreateAsync(userForCreate);
                 if (result.Succeeded)
                 {
-                    // 作成したユーザで即ログインする。
-                    var signInUser = await UserManager.FindByNameAsync(userForCreate.UserName);
-                    if (signInUser == null)
-                    {
-                        return View(user);
-                    }
-                    await SignInManager.SignInAsync(signInUser, isPersistent: false, rememberBrowser: false);
+                    //// 作成したユーザで即ログインする。
+                    //var signInUser = await UserManager.FindByNameAsync(userForCreate.UserName);
+                    //if (signInUser == null)
+                    //{
+                    //    return View(user);
+                    //}
+                    //await SignInManager.SignInAsync(signInUser, isPersistent: false, rememberBrowser: false);
 
-                    return RedirectToAction("Index");
+                    return RedirectToAction("ChangePassword");
                 }
                 AddErrors(result);
             }
@@ -155,7 +155,7 @@ namespace AuthSample2.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            AuthUser user = await db.AuthUsers.FindAsync(id);
+            AuthUser user = await db.Users.FindAsync(id);
             if (user == null)
             {
                 return HttpNotFound();
@@ -168,7 +168,7 @@ namespace AuthSample2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteConfirmed(string id)
         {
-            AuthUser user = await db.AuthUsers.FindAsync(id);
+            User user = await db.Users.FindAsync(id);
             db.AuthUsers.Remove(user);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
@@ -185,15 +185,23 @@ namespace AuthSample2.Controllers
         [HttpPost]
         public async Task<ActionResult> Login(User user, string returnUrl)
         {
-            var userForLogin = await UserManager.FindAsync(user.UserName, user.PasswordHash);
-            if (userForLogin == null)
+            if (!ModelState.IsValid)
             {
                 return View(user);
             }
-
-            await SignInManager.SignInAsync(userForLogin, false, false);
-
-            return RedirectToLocal(returnUrl);
+            var result = await SignInManager.PasswordSignInAsync(user.UserName, user.PasswordHash, false, true)
+;
+            switch (result)
+            {
+                case SignInStatus.Success:
+                    return RedirectToLocal(returnUrl);
+                case SignInStatus.LockedOut:
+                    return View("Lockout");
+                case SignInStatus.Failure:
+                default:
+                    ModelState.AddModelError("", "無効なログイン試行です。");
+                    return View(user);
+            }
         }
         // POST: /Home/LogOff
         [HttpPost]
@@ -230,6 +238,31 @@ namespace AuthSample2.Controllers
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                 }
                 return RedirectToAction("Index");
+            }
+            AddErrors(result);
+            return View(model);
+        }
+
+        public async  Task<ActionResult> Activate(string userId)
+        {
+            var user = await UserManager.FindByIdAsync(userId);
+            if(user == null)
+            {
+                return RedirectToAction("Index");
+            }
+            return View();
+        }
+        [HttpPost]
+        public async Task<ActionResult> Activate(UserActivateViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var result = await UserManager.AddPasswordAsync(model.UserId, model.Password);
+            if (result.Succeeded)
+            {
+                return RedirectToAction("Login");
             }
             AddErrors(result);
             return View(model);

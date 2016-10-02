@@ -27,5 +27,12 @@ namespace AuthCore
         [Column("hash_key")]
         [StringLength(255)]
         public string HashKey { get; set; }
+
+        [Column("login_retry_count")]
+        public int LonginRetryCount { get; set; }
+
+
+        [Column("lockout_end_date")]
+        public DateTime? LockoutEndDate { get; set; }
     }
 }
