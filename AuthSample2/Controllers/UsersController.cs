@@ -19,24 +19,24 @@ namespace AuthSample2.Controllers
 {
     public class UsersController : Controller
     {
-        private AuthDbContext db = new AuthDbContext();
-        private AuthUserManager _userManager;
-        private AuthSignInManager _signInManager;
+        private ApplicationDbContext db = new ApplicationDbContext();
+        private ApplicationUserManager _userManager;
+        private ApplicationSignInManager _signInManager;
         public UsersController()
         {
         }
 
-        public UsersController(AuthUserManager userManager, AuthSignInManager signInManager)
+        public UsersController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
         {
             UserManager = userManager;
             SignInManager = signInManager;
         }
 
-        public AuthSignInManager SignInManager
+        public ApplicationSignInManager SignInManager
         {
             get
             {
-                return _signInManager ?? HttpContext.GetOwinContext().Get<AuthSignInManager>();
+                return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
             }
             private set
             {
@@ -44,11 +44,11 @@ namespace AuthSample2.Controllers
             }
         }
 
-        public AuthUserManager UserManager
+        public ApplicationUserManager UserManager
         {
             get
             {
-                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<AuthUserManager>();
+                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
             }
             private set
             {
@@ -87,11 +87,11 @@ namespace AuthSample2.Controllers
         // 詳細については、http://go.microsoft.com/fwlink/?LinkId=317598 を参照してください。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "Id,UserName,PasswordHash")] AuthUser user)
+        public async Task<ActionResult> Create([Bind(Include = "Id,UserName,PasswordHash")] User user)
         {
             if (ModelState.IsValid)
             {
-                var userForCreate = new AuthUser
+                var userForCreate = new User
                 {
                     Id = Guid.NewGuid().ToString(),
                     UserName = user.UserName
@@ -134,7 +134,7 @@ namespace AuthSample2.Controllers
         // 詳細については、http://go.microsoft.com/fwlink/?LinkId=317598 を参照してください。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,UserName,Password,Memo")] AuthUser user)
+        public async Task<ActionResult> Edit([Bind(Include = "Id,UserName,PasswordHash,Memo")] User user)
         {
             if (ModelState.IsValid)
             {
@@ -183,7 +183,7 @@ namespace AuthSample2.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<ActionResult> Login(AuthUser user, string returnUrl)
+        public async Task<ActionResult> Login(User user, string returnUrl)
         {
             var userForLogin = await UserManager.FindAsync(user.UserName, user.PasswordHash);
             if (userForLogin == null)

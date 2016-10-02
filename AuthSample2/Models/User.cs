@@ -5,23 +5,17 @@ using System.Web;
 using Microsoft.AspNet.Identity;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace AuthSample2.Models
 {
-    public class User: IUser
+    public class User: AuthCore.AuthUser
     {
-        public string Id { get; set; }
+        [Column("type")]
+        public string Type { get; set; } = "auth";
 
-        [DisplayName("ユーザ名")]
-        [Required]
-        public string UserName { get; set; }
-
-        [DisplayName("パスワード")]
-        [Required]
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
-
+        [Column("memo")]
         [DisplayName("メモ")]
         public string Memo { get; set; }
     }

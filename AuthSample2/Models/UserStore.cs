@@ -29,7 +29,7 @@ namespace AuthSample2.Models
             // 1 つ以上のエンティティで検証が失敗しました。詳細については 'EntityValidationErrors' プロパティを参照してください。
             // ユーザー名重複チェックが自動的になされ、OK の場合のみここに来る。
             // パスワードは自動的に暗号化済みの状態でここに来る。
-            db.Users.Add(user);
+            db.AuthUsers.Add(user);
             db.SaveChanges();
             return Task.FromResult(default(object));
         }
@@ -103,7 +103,7 @@ namespace AuthSample2.Models
         /// <returns>IdentityResult オブジェクト</returns>
         public Task SetPasswordHashAsync(User user, string passwordHash)
         {
-            user.Password = passwordHash;
+            user.PasswordHash = passwordHash;
             return Task.FromResult(default(object));
         }
 
@@ -114,7 +114,7 @@ namespace AuthSample2.Models
         /// <returns>パスワードハッシュ文字列</returns>
         public Task<string> GetPasswordHashAsync(User user)
         {
-            var passwordHash = db.Users.Find(user.Id).Password;
+            var passwordHash = db.Users.Find(user.Id).PasswordHash;
             return Task.FromResult(passwordHash);
         }
 
@@ -125,7 +125,7 @@ namespace AuthSample2.Models
         /// <returns>パスワードが設定されている場合は true、それ以外の場合は false</returns>
         public Task<bool> HasPasswordAsync(User user)
         {
-            return Task.FromResult(user.Password != null);
+            return Task.FromResult(user.PasswordHash != null);
         }
 
         public void Dispose()

@@ -5,14 +5,14 @@ namespace AuthSample2.Migrations
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<AuthCore.AuthDbContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<AuthSample2.Models.ApplicationDbContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(AuthCore.AuthDbContext context)
+        protected override void Seed(AuthSample2.Models.ApplicationDbContext context)
         {
             //  This method will be called after migrating to the latest version.
 

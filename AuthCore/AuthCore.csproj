@@ -86,7 +86,7 @@
     <Compile Include="AuthUserManager.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="IAuthUser.cs" />
+    <Compile Include="AuthUser.cs" />
     <Compile Include="UserStore.cs" />
   </ItemGroup>
   <ItemGroup>
